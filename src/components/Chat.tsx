@@ -92,7 +92,7 @@ export default function Chat() {
 
   return (
     <div className="w-full max-w-2xl h-[80vh] bg-white rounded-xl shadow p-4 flex flex-col">
-      <div className="flex-1 overflow-y-auto space-y-4">
+      <div className="flex-1 overflow-y-auto space-y-4 hide-scrollbar">
         {messages.map((msg, idx) => (
           <div key={idx}>
             <MessageBubble sender={msg.sender} text={msg.text} />
@@ -111,7 +111,7 @@ export default function Chat() {
 
       <div className="mt-4 flex gap-3 items-center">
         <input
-          className="flex-1 border border-gray-300 rounded-full px-5 py-3 bg-gray-50 shadow-sm outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all text-base text-gray-900 placeholder-gray-400"
+          className="flex-1 border border-gray-300 rounded-full px-5 py-3 bg-gray-50 outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all text-base text-gray-900 placeholder-gray-400"
           placeholder="Type your message..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
