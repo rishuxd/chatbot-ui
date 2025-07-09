@@ -102,8 +102,8 @@ export default function Chat() {
           </div>
         ))}
         {loading && (
-          <div className="text-sm italic text-gray-500 animate-pulse">
-            Arya is typing…
+          <div className="text-sm text-gray-500 animate-pulse">
+            Bot is typing…
           </div>
         )}
         <div ref={chatRef} />
