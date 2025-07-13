@@ -123,7 +123,11 @@ export default function Chat() {
           disabled={loading || !input.trim()}
           aria-label="Send message"
         >
-          <Send size={24} strokeWidth={1.5} className="w-6 h-6 mr-1 mb-0.1 my-auto" />
+          <Send
+            size={24}
+            strokeWidth={1.5}
+            className="w-6 h-6 mr-1 mb-0.1 my-auto"
+          />
         </button>
       </div>
     </div>
