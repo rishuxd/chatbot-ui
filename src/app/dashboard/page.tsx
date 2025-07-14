@@ -31,9 +31,11 @@ export default function Dashboard() {
   }, []);
 
   const getStatusClass = (status: string) => {
-    if (status === "Accepted") return "bg-green-100 text-green-800";
-    if (status === "Rejected") return "bg-red-100 text-red-800";
-    return "bg-yellow-100 text-yellow-800";
+    if (status === "Accepted")
+      return "bg-green-100 text-green-800 border border-green-400";
+    if (status === "Rejected")
+      return "bg-red-100 text-red-800 border border-red-400";
+    return "bg-yellow-100 text-yellow-800 border border-yellow-400";
   };
 
   const handleLogout = () => {
@@ -49,25 +51,25 @@ export default function Dashboard() {
   };
 
   return (
-    <div>
+    <div className="w-full flex justify-center relative">
       <button
         onClick={handleLogout}
-        className="absolute top-4 right-4 text-sm bg-gradient-to-tr from-red-500 to-red-700 text-white px-4 py-2 rounded-full shadow hover:scale-105 transition-all"
+        className="fixed z-10 top-4 right-4 text-sm bg-gradient-to-tr from-red-500 to-red-700 text-white px-4 py-2 rounded-full shadow hover:scale-105 transition-all"
       >
         Logout
       </button>
 
       <button
         onClick={handleTest}
-        className="absolute top-16 right-4 text-sm bg-gradient-to-tr from-blue-500 to-blue-700 text-white px-4 py-2 rounded-full shadow hover:scale-105 transition-all"
+        className="fixed z-10 top-16 right-4 text-sm bg-gradient-to-tr from-blue-500 to-blue-700 text-white px-4 py-2 rounded-full shadow hover:scale-105 transition-all"
       >
         Toggle Data
       </button>
 
-      <div className="relative w-full max-w-2xl h-[80vh] bg-white rounded-xl shadow p-4 flex flex-col">
+      <div className="relative w-full max-w-2xl h-[80vh] bg-white rounded-xl shadow p-4 sm:p-6 flex flex-col">
         <div className="flex-1 overflow-y-auto space-y-4 hide-scrollbar mt-2">
           {!candidate ? (
-            <div className="min-w-2xl h-full flex flex-col items-center justify-center text-center space-y-6">
+            <div className="w-full h-full flex flex-col items-center justify-center text-center space-y-6 p-4">
               <p className="text-xl text-gray-700">No application found.</p>
               <Link
                 href="/chat"
@@ -78,7 +80,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <>
-              <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+              <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-2">
                 <p className="text-lg font-semibold text-gray-800 mb-2">
                   📋 Application Summary
                 </p>
@@ -105,11 +107,10 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              {/* QA Section */}
               <div className="space-y-4">
                 {candidate.questions_answers.map((qa, id) => (
                   <div
-                    key={id}
+                    key={`qa-${qa.question}`}
                     className="border border-gray-200 rounded-xl p-4"
                   >
                     <p className="font-semibold text-blue-600 mb-1">

@@ -17,7 +17,7 @@ export default function Register() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto mt-20 bg-white rounded-xl shadow p-6">
+    <div className="w-full max-w-md mx-auto bg-white rounded-xl shadow p-6">
       <h2 className="text-2xl font-semibold text-center mb-6">Register</h2>
       <form onSubmit={handleRegister} className="space-y-5">
         <input
