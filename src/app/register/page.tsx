@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { error } from "console";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -9,11 +11,40 @@ export default function Register() {
     email: "",
     password: "",
   });
+  const router = useRouter();
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Add your registration logic here
-    alert(`Registered with ${formData.email}`);
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: "candidate",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("user_id", data.user_id);
+        localStorage.setItem("name", data.name);
+        localStorage.setItem("email", data?.email);
+        localStorage.setItem("role", data.role);
+
+        router.push("/dashboard");
+      } else {
+        alert(data.message || "Registration failed!");
+      }
+    } catch (error: any) {
+      alert(error.message || "An error occurred during registration.");
+    }
   };
 
   return (

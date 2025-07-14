@@ -2,16 +2,40 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Add your login logic here
-    redirect("/dashboard");
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("user_id", data.user_id);
+        localStorage.setItem("name", data.name);
+        localStorage.setItem("email", data.email);
+        localStorage.setItem("role", data.role);
+
+        router.push("/dashboard");
+      } else {
+        alert(data.message || "Login failed!");
+      }
+    } catch (error: any) {
+      alert(error.message || "An error occurred during login!");
+    }
   };
 
   return (
@@ -42,7 +66,7 @@ export default function Login() {
         </button>
       </form>
       <p className="mt-4 text-center text-sm text-gray-600">
-        Don’t have an account?{" "}
+        Don't have an account?{" "}
         <Link href="/register" className="text-blue-600 hover:underline">
           Register
         </Link>

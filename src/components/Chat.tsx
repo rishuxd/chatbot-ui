@@ -10,19 +10,6 @@ type Message = {
   text: string;
 };
 
-const interviewQuestions: string[] = [
-  "Tell me about yourself.",
-  "Why are you interested in this position?",
-  "What are your strengths and weaknesses?",
-  "Where do you see yourself in 5 years?",
-  "Why do you want to work at our company?",
-  "Tell me about a challenge you overcame.",
-  "What technologies are you most comfortable with?",
-  "How do you handle deadlines or pressure?",
-  "Describe your experience with teamwork.",
-  "Do you have any questions for us?",
-];
-
 export default function Chat() {
   const router = useRouter();
 
@@ -33,7 +20,79 @@ export default function Chat() {
   const [answers, setAnswers] = useState<
     { question: string; answer: string }[]
   >([]);
+  const [interviewQuestions, setInterviewQuestions] = useState<string[]>([]);
   const chatRef = useRef<HTMLDivElement | null>(null);
+
+  const submitAnswers = async (
+    finalAnswers: { question: string; answer: string }[]
+  ) => {
+    try {
+      const userId = localStorage.getItem("user_id");
+      const userEmail = localStorage.getItem("email");
+
+      if (!userId || !userEmail) {
+        alert("User information not found. Please log in again.");
+        return;
+      }
+
+      const response = await fetch(
+        "http://127.0.0.1:5000/api/candidate/submit_screening",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: userId,
+            email: userEmail,
+            answers: finalAnswers,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to submit answers!");
+      }
+
+      const data = await response.json();
+      console.log("Submission successful:", data);
+    } catch (error) {
+      console.error("Error submitting answers:", error);
+      alert("Failed to submit answers. Please try again.");
+    }
+  };
+
+  const fetchQuestions = async () => {
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:5000/api/candidate/start_screening",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch questions!");
+      }
+
+      const data = await response.json();
+      setInterviewQuestions(data.questions);
+
+      if (data.questions.length > 0) {
+        const firstQuestion: Message = {
+          sender: "bot",
+          text: data.questions[0],
+        };
+        setMessages([firstQuestion]);
+      }
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+      alert("Failed to load interview questions. Please try again.");
+    }
+  };
 
   const sendMessage = async (text: string) => {
     if (!text.trim()) return;
@@ -50,7 +109,7 @@ export default function Chat() {
     setInput("");
     setLoading(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const nextIndex = currentQuestionIndex + 1;
       if (nextIndex < interviewQuestions.length) {
         const nextQuestion = interviewQuestions[nextIndex];
@@ -61,20 +120,18 @@ export default function Chat() {
         setMessages((prev) => [...prev, botMsg]);
         setCurrentQuestionIndex(nextIndex);
       } else {
+        const finalAnswers = answers.concat({
+          question: interviewQuestions[currentQuestionIndex],
+          answer: text,
+        });
+
+        await submitAnswers(finalAnswers);
+
         const botMsg: Message = {
           sender: "bot",
           text: "🎉 Thank you! Your responses have been submitted successfully. Our team will get back to you soon. You may return to the dashboard.",
         };
         setMessages((prev) => [...prev, botMsg]);
-
-        // Simulate submission (log to console for now)
-        console.log(
-          "Submitted Answers:",
-          answers.concat({
-            question: interviewQuestions[currentQuestionIndex],
-            answer: text,
-          })
-        );
       }
 
       setLoading(false);
@@ -82,11 +139,7 @@ export default function Chat() {
   };
 
   useEffect(() => {
-    const firstQuestion: Message = {
-      sender: "bot",
-      text: interviewQuestions[0],
-    };
-    setMessages([firstQuestion]);
+    fetchQuestions();
   }, []);
 
   useEffect(() => {
@@ -104,7 +157,6 @@ export default function Chat() {
 
   return (
     <div className="w-full flex justify-center">
-      {/* Fixed top-right Dashboard button */}
       <button
         onClick={handleBack}
         className="fixed top-4 right-4 z-10 text-sm bg-gradient-to-tr from-red-500 to-red-700 text-white px-4 py-2 rounded-full shadow hover:scale-105 transition-all"
@@ -112,12 +164,10 @@ export default function Chat() {
         Dashboard
       </button>
 
-      {/* Chat Container */}
       <div className="relative w-full max-w-2xl h-[80vh] bg-white rounded-xl shadow p-4 sm:p-6 flex flex-col">
-        {/* Chat messages */}
         <div className="flex-1 overflow-y-auto space-y-4 hide-scrollbar">
           {messages.map((msg, idx) => (
-            <div key={idx}>
+            <div key={`${msg.sender}-${msg.text}-${idx}`}>
               <MessageBubble sender={msg.sender} text={msg.text} />
             </div>
           ))}
